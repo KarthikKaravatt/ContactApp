@@ -54,15 +54,26 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun ContactScreen(state: ContactState, onEvent: (ContactEvent) -> Unit) {
     Scaffold(floatingActionButton = {
-        ExtendedFloatingActionButton(onClick = {
-            onEvent(ContactEvent.ShowDialog)
-        }) {
-            Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = null,
+        Column (){
 
-                )
-            Text(text = "Add Contact")
+            ExtendedFloatingActionButton(onClick = {
+                onEvent(ContactEvent.ShowDialog)
+            }, modifier = Modifier.padding(12.dp)) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = null,
+                    )
+                Text(text = "Add Contact")
+            }
+            ExtendedFloatingActionButton(onClick = { /*TODO*/ }) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = null,
+
+                    )
+                Text(text = "Import Contact")
+
+            }
         }
     }) { padding ->
         if (state.showDialog) {
@@ -76,7 +87,13 @@ fun ContactScreen(state: ContactState, onEvent: (ContactEvent) -> Unit) {
 }
 
 @Composable
-fun ContactList(modifier: Modifier, padding: PaddingValues, state: ContactState, onEvent: (ContactEvent) -> Unit) {
+fun ContactList(
+    modifier: Modifier,
+    padding: PaddingValues,
+    state: ContactState,
+    onEvent: (ContactEvent) -> Unit
+) {
+    onEvent(ContactEvent.GetContacts)
     BoxWithConstraints(modifier = modifier) {
         LazyColumn(modifier = modifier.fillMaxWidth(), contentPadding = padding) {
             items(state.contacts) { contact ->
@@ -104,7 +121,7 @@ fun ContactCard(contact: Contact, onEvent: (ContactEvent) -> Unit) {
                 .weight(0.8f)
         ) {
             TextField(
-                value = contact.firstName.plus("".plus(contact.lastName)),
+                value = contact.firstName.plus(" ".plus(contact.lastName)),
                 readOnly = true,
                 onValueChange = {},
                 modifier = Modifier
@@ -117,8 +134,14 @@ fun ContactCard(contact: Contact, onEvent: (ContactEvent) -> Unit) {
                     .fillMaxWidth()
                     .border(1.dp, Color.Black)
             )
+            TextField(
+                value = contact.email, readOnly = true, onValueChange = {},
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(1.dp, Color.Black)
+            )
         }
-        IconButton(onClick = {onEvent(ContactEvent.DeleteContact(contact))}) {
+        IconButton(onClick = { onEvent(ContactEvent.DeleteContact(contact)) }) {
             Icon(
                 imageVector = Icons.Default.Delete,
                 contentDescription = null,

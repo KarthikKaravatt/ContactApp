@@ -1,8 +1,8 @@
 package com.example.contactmanagementapp
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -33,16 +33,24 @@ fun AddContactDialogue(
                         }
         },
         text = {
-            Column {
-                TextField(value = state.firstName, onValueChange = {
-                    onEvent(ContactEvent.SetFirstName(it))
-                }, placeholder = { Text(text = "First Name") })
-                TextField(value = state.lastName, onValueChange = {
-                    onEvent(ContactEvent.SetLastName(it))
-                }, placeholder = { Text(text = "Last Name") })
-                TextField(value = state.phone, onValueChange = {
-                    onEvent(ContactEvent.SetPhone(it))
-                }, placeholder = { Text(text = "Phone Number") })
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                item {
+                    TextField(value = state.firstName, onValueChange = {
+                        onEvent(ContactEvent.SetFirstName(it))
+                    }, placeholder = { Text(text = "First Name") })
+                    TextField(value = state.lastName, onValueChange = {
+                        onEvent(ContactEvent.SetLastName(it))
+                    }, placeholder = { Text(text = "Last Name") })
+                    TextField(value = state.phone, onValueChange = {
+                        onEvent(ContactEvent.SetPhone(it))
+                    }, placeholder = { Text(text = "Phone Number") })
+                    TextField(value = state.email, onValueChange = {
+                        onEvent(ContactEvent.SetEmail(it))
+                    }, placeholder = { Text(text = "Email") })
+                }
             }
         },
     )

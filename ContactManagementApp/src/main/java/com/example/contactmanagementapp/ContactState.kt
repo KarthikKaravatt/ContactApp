@@ -6,5 +6,7 @@ data class ContactState (
     val lastName:String = "",
     val phone:String = "",
     val image:Int = 0,
+    val email:String = "",
     val showDialog:Boolean = false
-)
+) {
+}
