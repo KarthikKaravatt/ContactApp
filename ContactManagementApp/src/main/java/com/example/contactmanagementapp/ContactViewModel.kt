@@ -34,21 +34,22 @@ class ContactViewModel(private val doa: ContactDao) : ViewModel() {
                         firstName = "",
                         lastName = "",
                         phone = "",
-                        image = 0,
-                        email = ""
+                        image = null,
+                        email = "",
+                        showCamera = false
                     )
-                }
-            }
-
-            is ContactEvent.SetFirstName -> {
-                _state.update {
-                    it.copy(firstName = event.firstName)
                 }
             }
 
             is ContactEvent.SetLastName -> {
                 _state.update {
                     it.copy(lastName = event.lastName)
+                }
+            }
+
+            is ContactEvent.SetFirstName -> {
+                _state.update {
+                    it.copy(firstName = event.firstName)
                 }
             }
 
@@ -71,9 +72,19 @@ class ContactViewModel(private val doa: ContactDao) : ViewModel() {
             }
 
             is ContactEvent.SetImage -> {
-                _state.update {
-                    it.copy(image = event.image)
+                viewModelScope.launch {
+                    _state.update {
+                        it.copy(image = event.image, showCamera = false)
+                    }
+                    event.image?.let {
+                        doa.updateImage(
+                            event.contact.firstName,
+                            event.contact.lastName,
+                            it
+                        )
+                    }
                 }
+
             }
 
             is ContactEvent.SetEmail -> {
@@ -98,16 +109,30 @@ class ContactViewModel(private val doa: ContactDao) : ViewModel() {
                 }
             }
 
-            is ContactEvent.ShowDialog -> {
+            is ContactEvent.ShowAddContactDialog -> {
                 _state.update {
                     it.copy(showDialog = true)
                 }
             }
 
-            is ContactEvent.HideDialog -> {
+            is ContactEvent.HideAddContactDialog -> {
                 _state.update {
                     it.copy(showDialog = false)
                 }
+            }
+
+            is ContactEvent.ShowCamera -> {
+                _state.update {
+                    it.copy(showCamera = true, currentContact = event.contact)
+                }
+            }
+            is ContactEvent.RestImage -> {
+                _state.update {
+                    it.copy(image = null)
+                }
+            }
+            is ContactEvent.ShowEditContactDialog-> {
+                // TODO: DO something
             }
         }
     }

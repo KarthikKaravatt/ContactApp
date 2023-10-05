@@ -21,16 +21,17 @@ fun AddContactDialogue(
 ) {
     AlertDialog(
         modifier = modifier,
-        onDismissRequest = {onEvent(ContactEvent.HideDialog)},
+        onDismissRequest = { onEvent(ContactEvent.HideAddContactDialog) },
         title = { Text(text = "Add Contact") },
         confirmButton = {
-                        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd){
-                            Button(onClick = {
-                                onEvent(ContactEvent.SaveContact)
-                            }) {
-                                Text(text = "Save")
-                            }
-                        }
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
+                Button(onClick = {
+                    onEvent(ContactEvent.SaveContact)
+
+                }) {
+                    Text(text = "Save")
+                }
+            }
         },
         text = {
             LazyColumn(

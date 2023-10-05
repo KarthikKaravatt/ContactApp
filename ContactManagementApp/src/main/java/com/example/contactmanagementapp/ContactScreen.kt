@@ -1,8 +1,9 @@
 package com.example.contactmanagementapp
 
+import android.graphics.BitmapFactory
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -22,10 +23,17 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 
 //var contacts = listOf<Contact>(
 //    Contact("John", " Doe", "1234567890", R.drawable.ic_launcher_background),
@@ -49,38 +57,47 @@ import androidx.compose.ui.unit.dp
 //    Contact("John ", "Moore", "1234567890", R.drawable.ic_launcher_background),
 //    Contact("Jane ", "Moore", "1234567890", R.drawable.ic_launcher_background),
 //)
-
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 fun ContactScreen(state: ContactState, onEvent: (ContactEvent) -> Unit) {
+    val cameraPermissionState = rememberPermissionState(android.Manifest.permission.CAMERA)
     Scaffold(floatingActionButton = {
-        Column (){
+        Column() {
+            if (!state.showCamera) {
 
-            ExtendedFloatingActionButton(onClick = {
-                onEvent(ContactEvent.ShowDialog)
-            }, modifier = Modifier.padding(12.dp)) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = null,
+                ExtendedFloatingActionButton(onClick = {
+                    onEvent(ContactEvent.ShowAddContactDialog)
+                }, modifier = Modifier.padding(12.dp)) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = null,
                     )
-                Text(text = "Add Contact")
-            }
-            ExtendedFloatingActionButton(onClick = { /*TODO*/ }) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = null,
-
+                    Text(text = "Add Contact")
+                }
+                ExtendedFloatingActionButton(onClick = { /*TODO*/ }) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = null,
                     )
-                Text(text = "Import Contact")
+                    Text(text = "Import Contact")
 
+                }
             }
         }
     }) { padding ->
         if (state.showDialog) {
             AddContactDialogue(state, onEvent)
         }
-        Column {
-            ContactList(modifier = Modifier, padding = padding, state, onEvent)
+        if (state.showCamera) {
+            if (cameraPermissionState.status.isGranted) {
+                 CameraScreen(state, onEvent)
+            } else {
+                cameraPermissionState.launchPermissionRequest()
+            }
+        } else {
+            Column {
+                ContactList(modifier = Modifier, padding = padding, state, onEvent)
+            }
         }
 
     }
@@ -94,25 +111,40 @@ fun ContactList(
     onEvent: (ContactEvent) -> Unit
 ) {
     onEvent(ContactEvent.GetContacts)
-    BoxWithConstraints(modifier = modifier) {
-        LazyColumn(modifier = modifier.fillMaxWidth(), contentPadding = padding) {
-            items(state.contacts) { contact ->
-                ContactCard(contact = contact, onEvent)
-            }
+    LazyColumn(modifier = modifier.fillMaxWidth(), contentPadding = padding) {
+        items(state.contacts) { contact ->
+            ContactCard(contact = contact, onEvent)
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 fun ContactCard(contact: Contact, onEvent: (ContactEvent) -> Unit) {
+    val cameraPermissionState = rememberPermissionState(android.Manifest.permission.CAMERA)
+    val resource = painterResource(id = R.drawable.ic_launcher_background)
+    val drawable = remember { mutableStateOf(resource) }
+    if (contact.image != null) {
+        //TODO: maybe error here
+        val bitmap = BitmapFactory.decodeByteArray(contact.image, 0, contact.image!!.size)
+        drawable.value = BitmapPainter(bitmap.asImageBitmap())
+    }
     Row {
         Image(
-            painter = painterResource(id = R.drawable.ic_launcher_background),
-            contentDescription = null, modifier = Modifier
+            painter = drawable.value,
+            contentDescription = null,
+            modifier = Modifier
                 .padding(8.dp)
                 .weight(0.2f)
                 .fillMaxSize()
+                .clickable {
+                    if (cameraPermissionState.status.isGranted) {
+                        onEvent(ContactEvent.ShowCamera(contact))
+                    } else {
+//                        onEvent(ContactEvent.SetImage(contact, state.image))
+                        cameraPermissionState.launchPermissionRequest()
+                    }
+                },
         )
         Column(
             modifier = Modifier
@@ -150,6 +182,7 @@ fun ContactCard(contact: Contact, onEvent: (ContactEvent) -> Unit) {
 
     }
 }
+
 
 
 

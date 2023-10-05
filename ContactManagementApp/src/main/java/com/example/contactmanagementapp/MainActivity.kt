@@ -9,12 +9,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.room.Room
 
 
 @Suppress("UNCHECKED_CAST")
 class MainActivity : ComponentActivity() {
+
     private val _db by lazy {
         Room.databaseBuilder(
             applicationContext,
@@ -41,5 +41,4 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
 }
