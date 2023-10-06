@@ -96,6 +96,23 @@ fun ContactScreen(state: ContactState, onEvent: (ContactEvent) -> Unit) {
             }
         }
     }) { padding ->
+        if(selectedContact.value != null){
+            // save contact to state
+            onEvent(ContactEvent.SetFirstName(selectedContact.value!!.firstName))
+            onEvent(ContactEvent.SetLastName(selectedContact.value!!.lastName))
+            onEvent(ContactEvent.SetPhone(selectedContact.value!!.phone))
+            onEvent(ContactEvent.SetEmail(selectedContact.value!!.email))
+            // save contact to DB
+            onEvent(ContactEvent.SaveContact)
+            selectedContact.value = null
+            // hide export screen
+            onEvent(ContactEvent.HideExportContact)
+            // reset state
+            onEvent(ContactEvent.SetFirstName(""))
+            onEvent(ContactEvent.SetLastName(""))
+            onEvent(ContactEvent.SetPhone(""))
+            onEvent(ContactEvent.SetEmail(""))
+        }
         if (state.showDialog) {
             AddContactDialogue(state, onEvent)
         } else if (state.showCamera) {
@@ -107,7 +124,7 @@ fun ContactScreen(state: ContactState, onEvent: (ContactEvent) -> Unit) {
         }
         else if (state.showExportContact) {
             if (contactPermissionState.status.isGranted) {
-                ContactPickerTwinTurbo(selectedContact, onEvent)
+                ContactPickerTwinTurbo(selectedContact)
             } else {
                 Toast
                     .makeText(

@@ -21,8 +21,7 @@ import androidx.compose.ui.unit.dp
 @SuppressLint("Range", "Recycle")
 @Composable
 fun ContactPickerTwinTurbo(
-    selectedContact: MutableState<Contact?>,
-    onEvent: (ContactEvent) -> Unit
+    selectedContact: MutableState<Contact?>
 ) {
     val context = LocalContext.current
     val launcher = rememberLauncherForActivityResult(
@@ -93,17 +92,9 @@ fun ContactPickerTwinTurbo(
     )
     Button(
         onClick = {
-            if (selectedContact.value != null) {
-                onEvent(ContactEvent.SetFirstName(selectedContact.value!!.firstName))
-                onEvent(ContactEvent.SetLastName(selectedContact.value!!.lastName))
-                onEvent(ContactEvent.SetPhone(selectedContact.value!!.phone))
-                onEvent(ContactEvent.SetEmail(selectedContact.value!!.email))
-                onEvent(ContactEvent.SetImage(selectedContact.value!!, selectedContact.value!!.image))
-                // Save the contact to the database
-                onEvent(ContactEvent.SaveContact)
-                onEvent(ContactEvent.HideExportContact)
+            if (selectedContact.value == null) {
+                launcher.launch()
             }
-            launcher.launch()
         },
         modifier = Modifier
             .fillMaxWidth()
