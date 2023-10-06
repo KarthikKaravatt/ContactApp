@@ -1,6 +1,7 @@
 package com.example.contactmanagementapp
 
 import android.graphics.BitmapFactory
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -31,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -62,10 +64,13 @@ import com.google.accompanist.permissions.rememberPermissionState
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 fun ContactScreen(state: ContactState, onEvent: (ContactEvent) -> Unit) {
+    val context = LocalContext.current
+    val contactPermissionState = rememberPermissionState(android.Manifest.permission.READ_CONTACTS)
     val cameraPermissionState = rememberPermissionState(android.Manifest.permission.CAMERA)
+    val selectedContact = remember { mutableStateOf<Contact?>(null) }
     Scaffold(floatingActionButton = {
         Column() {
-            if (!state.showCamera) {
+            if (!state.showCamera && !state.showExportContact) {
 
                 ExtendedFloatingActionButton(onClick = {
                     onEvent(ContactEvent.ShowAddContactDialog)
@@ -76,7 +81,11 @@ fun ContactScreen(state: ContactState, onEvent: (ContactEvent) -> Unit) {
                     )
                     Text(text = "Add Contact")
                 }
-                ExtendedFloatingActionButton(onClick = { /*TODO*/ }) {
+                ExtendedFloatingActionButton(
+                    onClick = {
+                        onEvent(ContactEvent.ShowExportContact)
+                    },
+                ) {
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = null,
@@ -89,12 +98,25 @@ fun ContactScreen(state: ContactState, onEvent: (ContactEvent) -> Unit) {
     }) { padding ->
         if (state.showDialog) {
             AddContactDialogue(state, onEvent)
-        }
-        if (state.showCamera) {
+        } else if (state.showCamera) {
             if (cameraPermissionState.status.isGranted) {
                 CameraScreen(state, onEvent)
             } else {
                 cameraPermissionState.launchPermissionRequest()
+            }
+        }
+        else if (state.showExportContact) {
+            if (contactPermissionState.status.isGranted) {
+                ContactPickerTwinTurbo(selectedContact, onEvent)
+            } else {
+                Toast
+                    .makeText(
+                        context,
+                        "Contact Permission Required",
+                        Toast.LENGTH_SHORT
+                    )
+                    .show()
+                contactPermissionState.launchPermissionRequest()
             }
         } else {
             Column {
@@ -115,7 +137,7 @@ fun ContactList(
     onEvent(ContactEvent.GetContacts)
     LazyColumn(modifier = modifier.fillMaxWidth(), contentPadding = padding) {
         items(state.contacts) { contact ->
-            ContactCard(contact = contact,state.contacts, onEvent)
+            ContactCard(contact = contact, state.contacts, onEvent)
         }
     }
 }
@@ -123,6 +145,7 @@ fun ContactList(
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 fun ContactCard(contact: Contact, contacts: List<Contact>, onEvent: (ContactEvent) -> Unit) {
+    val context = LocalContext.current
     val cameraPermissionState = rememberPermissionState(android.Manifest.permission.CAMERA)
     val resource = painterResource(id = R.drawable.ic_launcher_background)
     val drawable = remember { mutableStateOf(resource) }
@@ -147,7 +170,13 @@ fun ContactCard(contact: Contact, contacts: List<Contact>, onEvent: (ContactEven
                     if (cameraPermissionState.status.isGranted) {
                         onEvent(ContactEvent.ShowCamera(contact))
                     } else {
-//                        onEvent(ContactEvent.SetImage(contact, state.image))
+                        Toast
+                            .makeText(
+                                context,
+                                "Camera Permission Required",
+                                Toast.LENGTH_SHORT
+                            )
+                            .show()
                         cameraPermissionState.launchPermissionRequest()
                     }
                 },

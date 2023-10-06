@@ -36,7 +36,8 @@ class ContactViewModel(private val doa: ContactDao) : ViewModel() {
                         phone = "",
                         image = null,
                         email = "",
-                        showCamera = false
+                        showCamera = false,
+                        showExportContact = false
                     )
                 }
             }
@@ -86,6 +87,7 @@ class ContactViewModel(private val doa: ContactDao) : ViewModel() {
                 }
 
             }
+
             is ContactEvent.SetEmail -> {
                 _state.update {
                     it.copy(email = event.email)
@@ -107,7 +109,17 @@ class ContactViewModel(private val doa: ContactDao) : ViewModel() {
                     _contacts.update { doa.getAll() }
                 }
             }
+            is ContactEvent.HideExportContact -> {
+                _state.update {
+                    it.copy(showExportContact = false)
+                }
+            }
 
+            is ContactEvent.ShowExportContact -> {
+                _state.update {
+                    it.copy(showExportContact = true)
+                }
+            }
             is ContactEvent.ShowAddContactDialog -> {
                 _state.update {
                     it.copy(showDialog = true)
@@ -125,11 +137,13 @@ class ContactViewModel(private val doa: ContactDao) : ViewModel() {
                     it.copy(showCamera = true, currentContact = event.contact)
                 }
             }
+
             is ContactEvent.RestImage -> {
                 _state.update {
                     it.copy(image = null)
                 }
             }
+
             is ContactEvent.UpdateFirstName -> {
                 viewModelScope.launch {
                     doa.updateFirstName(
@@ -151,6 +165,7 @@ class ContactViewModel(private val doa: ContactDao) : ViewModel() {
                     _contacts.update { doa.getAll() }
                 }
             }
+
             is ContactEvent.UpdateLastName -> {
                 viewModelScope.launch {
                     doa.updateLastName(
@@ -161,6 +176,7 @@ class ContactViewModel(private val doa: ContactDao) : ViewModel() {
                     _contacts.update { doa.getAll() }
                 }
             }
+
             is ContactEvent.UpdatePhone -> {
                 viewModelScope.launch {
                     doa.updatePhone(
@@ -171,6 +187,7 @@ class ContactViewModel(private val doa: ContactDao) : ViewModel() {
                     _contacts.update { doa.getAll() }
                 }
             }
+
         }
     }
 }

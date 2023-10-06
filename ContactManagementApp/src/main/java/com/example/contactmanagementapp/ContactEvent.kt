@@ -34,6 +34,8 @@ sealed interface ContactEvent{
     data class DeleteContact(val contact: Contact): ContactEvent
     object ShowAddContactDialog: ContactEvent
     object HideAddContactDialog: ContactEvent
+    object ShowExportContact: ContactEvent
+    object HideExportContact: ContactEvent
     data class UpdateFirstName(val contact: Contact, val firstName: String): ContactEvent
     data class UpdateLastName(val contact: Contact, val lastName: String): ContactEvent
     data class UpdatePhone(val contact: Contact, val phone: String): ContactEvent
