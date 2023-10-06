@@ -23,8 +23,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
@@ -90,7 +92,7 @@ fun ContactScreen(state: ContactState, onEvent: (ContactEvent) -> Unit) {
         }
         if (state.showCamera) {
             if (cameraPermissionState.status.isGranted) {
-                 CameraScreen(state, onEvent)
+                CameraScreen(state, onEvent)
             } else {
                 cameraPermissionState.launchPermissionRequest()
             }
@@ -113,14 +115,14 @@ fun ContactList(
     onEvent(ContactEvent.GetContacts)
     LazyColumn(modifier = modifier.fillMaxWidth(), contentPadding = padding) {
         items(state.contacts) { contact ->
-            ContactCard(contact = contact, onEvent)
+            ContactCard(contact = contact,state.contacts, onEvent)
         }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
-fun ContactCard(contact: Contact, onEvent: (ContactEvent) -> Unit) {
+fun ContactCard(contact: Contact, contacts: List<Contact>, onEvent: (ContactEvent) -> Unit) {
     val cameraPermissionState = rememberPermissionState(android.Manifest.permission.CAMERA)
     val resource = painterResource(id = R.drawable.ic_launcher_background)
     val drawable = remember { mutableStateOf(resource) }
@@ -130,6 +132,10 @@ fun ContactCard(contact: Contact, onEvent: (ContactEvent) -> Unit) {
         drawable.value = BitmapPainter(bitmap.asImageBitmap())
     }
     Row {
+        var firstName by remember { mutableStateOf(contact.firstName) }
+        var lastName by remember { mutableStateOf(contact.lastName) }
+        var phone by remember { mutableStateOf(contact.phone) }
+        var email by remember { mutableStateOf(contact.email) }
         Image(
             painter = drawable.value,
             contentDescription = null,
@@ -153,21 +159,51 @@ fun ContactCard(contact: Contact, onEvent: (ContactEvent) -> Unit) {
                 .weight(0.8f)
         ) {
             TextField(
-                value = contact.firstName.plus(" ".plus(contact.lastName)),
-                readOnly = true,
-                onValueChange = {},
+                value = firstName,
+                onValueChange = {
+                    // check if the changed value is already in the list
+                    if (contacts.any { contact -> contact.firstName == it }) {
+                        firstName = contact.firstName
+                    } else {
+                        firstName = it
+                        onEvent(ContactEvent.UpdateFirstName(contact, it))
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .border(1.dp, Color.Black)
             )
             TextField(
-                value = contact.phone, readOnly = true, onValueChange = {},
+                value = lastName,
+                onValueChange = {
+                    // check if the changed value is already in the list
+                    if (contacts.any { contact -> contact.lastName == it }) {
+                        lastName = contact.lastName
+                    } else {
+                        lastName = it
+                        onEvent(ContactEvent.UpdateLastName(contact, it))
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .border(1.dp, Color.Black)
             )
             TextField(
-                value = contact.email, readOnly = true, onValueChange = {},
+                value = phone,
+                onValueChange = {
+                    phone = it
+                    onEvent(ContactEvent.UpdatePhone(contact, it))
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(1.dp, Color.Black)
+            )
+            TextField(
+                value = email,
+                onValueChange = {
+                    email = it
+                    onEvent(ContactEvent.UpdateEmail(contact, it))
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .border(1.dp, Color.Black)

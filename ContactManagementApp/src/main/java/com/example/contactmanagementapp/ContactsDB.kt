@@ -9,6 +9,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.RoomDatabase
+import androidx.room.Transaction
 
 @Entity(tableName = "contacts", primaryKeys = ["firstName", "lastName"])
 data class Contact(
@@ -59,13 +60,37 @@ interface ContactDao {
     suspend fun delete(contact: Contact)
 
 
-    //Update the first name
-    @Query("UPDATE contacts SET firstName = :firstName WHERE firstName = :oldFirstName AND lastName = :lastName")
-    suspend fun updateFirstName(firstName: String, oldFirstName: String, lastName: String)
+    // Update the first name
+    @Transaction
+    suspend fun updateFirstName(oldFirstName: String, lastName: String, newFirstName: String) {
+        val existingContact = getContact(newFirstName, lastName)
+        if (existingContact == null) {
+            // No conflict, proceed with update
+            updateFirstNameInternal(oldFirstName, lastName, newFirstName)
+        } else {
+            // Handle conflict (e.g., throw an exception or inform the user)
+        }
+    }
+    @Query("SELECT * FROM contacts WHERE firstName = :firstName AND lastName = :lastName LIMIT 1")
+    suspend fun getContact(firstName: String, lastName: String): Contact?
+
+    @Query("UPDATE contacts SET firstName = :newFirstName WHERE firstName = :oldFirstName AND lastName = :lastName")
+    suspend fun updateFirstNameInternal(oldFirstName: String, lastName: String, newFirstName: String)
+
 
     //Update the last name
-    @Query("UPDATE contacts SET lastName = :lastName WHERE firstName = :firstName AND lastName = :oldLastName")
-    suspend fun updateLastName(firstName: String, lastName: String, oldLastName: String)
+    @Transaction
+    suspend fun updateLastName(firstName: String, oldLastName: String, newLastName: String) {
+        val existingContact = getContact(firstName, newLastName)
+        if (existingContact == null) {
+            // No conflict, proceed with update
+            updateLastNameInternal(firstName, oldLastName, newLastName)
+        } else {
+            // Handle conflict (e.g., throw an exception or inform the user)
+        }
+    }
+    @Query("UPDATE contacts SET lastName = :newLastName WHERE firstName = :firstName AND lastName = :oldLastName")
+    suspend fun updateLastNameInternal(firstName: String, oldLastName: String, newLastName: String)
 
     //Update the phone number
     @Query("UPDATE contacts SET phone = :phone WHERE firstName = :firstName AND lastName = :lastName")

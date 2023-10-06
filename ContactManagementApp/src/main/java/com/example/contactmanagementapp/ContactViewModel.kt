@@ -86,7 +86,6 @@ class ContactViewModel(private val doa: ContactDao) : ViewModel() {
                 }
 
             }
-
             is ContactEvent.SetEmail -> {
                 _state.update {
                     it.copy(email = event.email)
@@ -133,6 +132,48 @@ class ContactViewModel(private val doa: ContactDao) : ViewModel() {
             }
             is ContactEvent.ShowEditContactDialog-> {
                 // TODO: DO something
+            }
+
+            is ContactEvent.UpdateFirstName -> {
+                viewModelScope.launch {
+                    doa.updateFirstName(
+                        event.contact.firstName,
+                        event.contact.lastName,
+                        event.firstName
+                    )
+                    _contacts.update { doa.getAll() }
+                }
+            }
+
+            is ContactEvent.UpdateEmail -> {
+                viewModelScope.launch {
+                    doa.updateEmail(
+                        event.contact.firstName,
+                        event.contact.lastName,
+                        event.email
+                    )
+                    _contacts.update { doa.getAll() }
+                }
+            }
+            is ContactEvent.UpdateLastName -> {
+                viewModelScope.launch {
+                    doa.updateLastName(
+                        event.contact.firstName,
+                        event.contact.lastName,
+                        event.lastName
+                    )
+                    _contacts.update { doa.getAll() }
+                }
+            }
+            is ContactEvent.UpdatePhone -> {
+                viewModelScope.launch {
+                    doa.updatePhone(
+                        event.contact.firstName,
+                        event.contact.lastName,
+                        event.phone
+                    )
+                    _contacts.update { doa.getAll() }
+                }
             }
         }
     }
