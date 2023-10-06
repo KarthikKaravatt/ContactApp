@@ -130,10 +130,6 @@ class ContactViewModel(private val doa: ContactDao) : ViewModel() {
                     it.copy(image = null)
                 }
             }
-            is ContactEvent.ShowEditContactDialog-> {
-                // TODO: DO something
-            }
-
             is ContactEvent.UpdateFirstName -> {
                 viewModelScope.launch {
                     doa.updateFirstName(

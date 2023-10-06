@@ -39,6 +39,5 @@ sealed interface ContactEvent{
     data class UpdatePhone(val contact: Contact, val phone: String): ContactEvent
     data class UpdateEmail(val contact: Contact, val email: String): ContactEvent
 
-    data class ShowEditContactDialog(val contact: Contact): ContactEvent
     class ShowCamera(val contact: Contact) : ContactEvent
 }
