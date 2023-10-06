@@ -37,7 +37,9 @@ class MainActivity : ComponentActivity() {
         setContent {
             Box {
                 val state by viewModel.state.collectAsState()
-                ContactScreen(state = state, onEvent = viewModel::onEvent)
+                ContactScreen(state = state, onEvent = {
+                    viewModel.onEvent(applicationContext, it)
+                })
             }
         }
     }

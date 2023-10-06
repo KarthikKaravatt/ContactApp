@@ -90,6 +90,7 @@ fun ContactPickerTwinTurbo(
             selectedContact.value = contact
         }
     )
+    // Have to have this or else the launcher won't work
     Button(
         onClick = {
             if (selectedContact.value == null) {

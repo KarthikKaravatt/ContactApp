@@ -1,5 +1,6 @@
 package com.example.contactmanagementapp
 
+import android.util.Log
 import androidx.room.ColumnInfo
 import androidx.room.Dao
 import androidx.room.Database
@@ -68,7 +69,7 @@ interface ContactDao {
             // No conflict, proceed with update
             updateFirstNameInternal(oldFirstName, lastName, newFirstName)
         } else {
-            // Handle conflict (e.g., throw an exception or inform the user)
+            Log.d("ContactDao", "Error updating first name")
         }
     }
     @Query("SELECT * FROM contacts WHERE firstName = :firstName AND lastName = :lastName LIMIT 1")
@@ -86,7 +87,7 @@ interface ContactDao {
             // No conflict, proceed with update
             updateLastNameInternal(firstName, oldLastName, newLastName)
         } else {
-            // Handle conflict (e.g., throw an exception or inform the user)
+            Log.d("ContactDao", "Error updating last name")
         }
     }
     @Query("UPDATE contacts SET lastName = :newLastName WHERE firstName = :firstName AND lastName = :oldLastName")

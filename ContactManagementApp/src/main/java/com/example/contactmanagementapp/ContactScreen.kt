@@ -210,6 +210,11 @@ fun ContactCard(contact: Contact, contacts: List<Contact>, onEvent: (ContactEven
                     // check if the changed value is already in the list
                     if (contacts.any { contact -> contact.firstName == it }) {
                         firstName = contact.firstName
+                        Toast.makeText(
+                            context,
+                            "Contact already exists",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     } else {
                         firstName = it
                         onEvent(ContactEvent.UpdateFirstName(contact, it))
@@ -225,6 +230,11 @@ fun ContactCard(contact: Contact, contacts: List<Contact>, onEvent: (ContactEven
                     // check if the changed value is already in the list
                     if (contacts.any { contact -> contact.lastName == it }) {
                         lastName = contact.lastName
+                        Toast.makeText(
+                            context,
+                            "Contact already exists",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     } else {
                         lastName = it
                         onEvent(ContactEvent.UpdateLastName(contact, it))

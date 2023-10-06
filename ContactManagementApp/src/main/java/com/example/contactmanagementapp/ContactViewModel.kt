@@ -1,5 +1,7 @@
 package com.example.contactmanagementapp
 
+import android.content.Context
+import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,7 +18,7 @@ class ContactViewModel(private val doa: ContactDao) : ViewModel() {
         state.copy(contacts = contacts)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ContactState())
 
-    fun onEvent(event: ContactEvent) {
+    fun onEvent(context: Context, event: ContactEvent) {
         when (event) {
             is ContactEvent.SaveContact -> {
                 val firstName = _state.value.firstName
@@ -25,8 +27,18 @@ class ContactViewModel(private val doa: ContactDao) : ViewModel() {
                 val image = _state.value.image
                 val email = _state.value.email
                 viewModelScope.launch {
-                    doa.insertAll(Contact(firstName, lastName, phone, email, image))
-                    _contacts.update { doa.getAll() }
+                    val contact = doa.getContact(firstName, lastName)
+                    if (contact== null){
+                        doa.insertAll(Contact(firstName, lastName, phone, email, image))
+                        _contacts.update { doa.getAll() }
+                    }
+                    else{
+                        Toast.makeText(
+                            context,
+                            "Contact already exists",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
                 }
                 _state.update {
                     it.copy(
