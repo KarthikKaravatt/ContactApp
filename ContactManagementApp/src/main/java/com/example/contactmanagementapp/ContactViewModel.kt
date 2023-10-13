@@ -27,17 +27,25 @@ class ContactViewModel(private val doa: ContactDao) : ViewModel() {
                 val image = _state.value.image
                 val email = _state.value.email
                 viewModelScope.launch {
-                    val contact = doa.getContact(firstName, lastName)
-                    if (contact== null){
-                        doa.insertAll(Contact(firstName, lastName, phone, email, image))
-                        _contacts.update { doa.getAll() }
-                    }
-                    else{
+                    if (firstName.isEmpty() || lastName.isEmpty() || phone.isEmpty() || email.isEmpty()) {
                         Toast.makeText(
                             context,
-                            "Contact already exists",
+                            "Please fill out all fields",
                             Toast.LENGTH_SHORT
                         ).show()
+                    }
+                    else {
+                        val contact = doa.getContact(firstName, lastName)
+                        if (contact == null) {
+                            doa.insertAll(Contact(firstName, lastName, phone, email, image))
+                            _contacts.update { doa.getAll() }
+                        } else {
+                            Toast.makeText(
+                                context,
+                                "Contact already exists",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
                     }
                 }
                 _state.update {
